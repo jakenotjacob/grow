@@ -1,15 +1,35 @@
-##KV Tutorial (http://elixir-lang.org/getting-started/mix-otp/introduction-to-mix.html)
+#[KV Tutorial](http://elixir-lang.org/getting-started/mix-otp/introduction-to-mix.html)
 
 ##Mix
-An Elixir executable used for dependency management, packaging, preparing
+
+Elixir executable used for dependency management, packaging, preparing
 documentation, testing, and more. See: `man mix`
 
-#Creating a new project with mix
+Creating a new project with mix
+===============================
+To create a basic project using mix use:
 `mix new projectname`
-To create a basic project using mix.
+ - `--sup`    Creats a supervision tree
+ - `--module` Explicitly states the **main module** name
+  -  defaults to _uppercases_ the first letter, _lowercase_ remainder
 
-Some handy flags are:
- - `--sup`    - To create a supervision tree
- - `--module` - To define the name of the 'main module' instead of the default
-   name. (which uppercases the first letter, followed by lowercase of the
-   remaining)
+Mix files
+---------
+####mix.exs
+
+Project function used for project configuration
+```elixir
+def project do
+  [app: :appname,
+   #...
+   deps: deps]
+end
+```
+
+Application function for generating the application file
+```elixir
+def application do
+  [applications: [:logger]]
+end
+```
+
