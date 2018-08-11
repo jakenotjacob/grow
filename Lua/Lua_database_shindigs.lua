@@ -1,0 +1,44 @@
+--local driver = require('luasql.postgres')
+--local env = assert(driver.postgres())
+--local con = assert(env:connect('metropolis'))
+--
+---- add a few elements
+----list = {
+----  { name="Jose das Couves", email="jose@couves.com", },
+----  { name="Manoel Joaquim", email="manoel.joaquim@cafundo.com", },
+----  { name="Maria das Dores", email="maria@dores.com", },
+--
+--
+--local function addRow()
+--  for i, p in pairs (list) do
+--    res = assert (con:execute(string.format([[
+--      INSERT INTO player
+--      VALUES ('%s', '%s')]], p.name, p.license)
+--    ))
+--  end
+--end
+--
+---- retrieve a cursor
+--cur = assert (con:execute"SELECT name, license from player")
+--
+---- print all rows, the rows will be indexed by field names
+--row = cur:fetch ({}, "a")
+--while row do
+--  print(string.format("Name: %s, License: %s", row.name, row.license))
+--  -- reusing the table of results
+--  row = cur:fetch (row, "a")
+--end
+--
+----local function seed()
+----  res = assert (conn:execute[[
+----    CREATE TABLE players(
+----      name  varchar(50),
+----      license varchar(40)
+----    )
+----  ]])
+----end
+--
+--cur:close()
+--con:close()
+--env:close()
+--
