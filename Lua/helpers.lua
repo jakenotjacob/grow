@@ -1,8 +1,7 @@
 --Stringsplitter 9000
 
 function string:split(...)
-  local splt = {}
-  local sep = sep or (... and "[^"..(...).."]+") or "%w+"
+  local splt, sep = {}, sep or (... and "[^"..(...).."]+") or "%w+"
   for w in string.gmatch(self,sep) do table.insert(splt,w) end
   return splt
 end
