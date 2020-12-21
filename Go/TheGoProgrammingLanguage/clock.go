@@ -21,7 +21,7 @@ func main() {
 		}
 		if conn != nil {
 			fmt.Println("Client connected!")
-			handleConn(conn) // handle one connection at a time
+			go handleConn(conn) // handle one connection at a time
 		}
 	}
 }
