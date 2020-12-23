@@ -8,8 +8,8 @@ import "C"
 //Comment below to export the function symbol
 
 //export Boop
-func Boop() string {
-	return "ohno!"
+func Boop(s string) string {
+	return s
 }
 
 func main() {}
