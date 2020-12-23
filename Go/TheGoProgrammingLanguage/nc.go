@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"net"
@@ -9,6 +10,10 @@ import (
 
 func main() {
 	conn, err := net.Dial("tcp", "localhost:8000")
+
+	fmt.Println(conn.LocalAddr())
+	fmt.Println(conn.LocalAddr)
+
 	if err != nil {
 		log.Fatal(err)
 	}
