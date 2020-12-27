@@ -8,13 +8,15 @@ func main() {
 
 	// Counter
 	go func() {
-		for x := 0; ; x++ {
+		defer close(naturals)
+		for x := 0; x < 100; x++ {
 			naturals <- x
 		}
 	}()
 
 	// Squarer
 	go func() {
+		defer close(squares)
 		for {
 			x, ok := <-naturals
 			if !ok {
@@ -22,11 +24,10 @@ func main() {
 			}
 			squares <- x * x
 		}
-		close(squares)
 	}()
 
 	// Printer
-	for {
-		fmt.Println(<-squares)
+	for x := range squares {
+		fmt.Println(x)
 	}
 }
