@@ -1,0 +1,10 @@
+steps:
+    - label: 'Gather Asset information'
+      command:
+       - make gather_asset_information
+      plugins:
+       sendgrid-ops/ssm#${SSM_PLUGIN_VERSION}:
+        map:
+          - /production/techops/collins/username:COLLINS_USERNAME
+          - /production/techops/collins/password:COLLINS_PASSWORD
+   
