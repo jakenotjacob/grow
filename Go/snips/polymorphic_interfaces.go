@@ -1,5 +1,9 @@
 package main
 
+// This is a little snippet testing out embedded/polymorphic interfaces
+// after learning about embedded structs and interfaces.
+// (Ruby ¯\_(ツ)_/¯)
+
 import "fmt"
 
 type Base interface {
