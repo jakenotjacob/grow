@@ -19,6 +19,7 @@ func main() {
 	for countdown := 10; countdown > 0; countdown-- {
 		select {
 		case <-tick:
+			fmt.Printf("%T", tick)
 			fmt.Println(countdown)
 		case <-abort:
 			fmt.Println("Launch aborted!")
