@@ -1,33 +1,75 @@
 package main
 
 import (
-	"log"
+	"fmt"
+	"net"
 	"os"
 	"text/template"
 )
 
 type Worker struct {
-	Id    int8
-	Conns []int8
+	Id      int
+	Conns   chan net.Conn
+	ConnLen int
+}
+
+const workerview = `
+Worker[{{.Id}}] {{ range .Conns }} {{ printf "#" }} {{ end }}
+`
+
+// Returns worker id dispatched to or error
+func Dispatch(workers []*Worker, conn net.Conn, signals chan int) (interface{}, error) {
+	// Dispatch connection to first worker with capacity available
+	for _, worker := range workers {
+		if len(worker.Conns) < cap(worker.Conns) {
+			worker.Conns <- conn
+			worker.ConnLen = len(worker.Conns)
+			signals <- worker.Id
+		}
+		//TODO closing causes infinite loop
+		//close(signals)
+		return worker.Id, fmt.Errorf("All workers are at full capacity! (sending to waiting room?)")
+	}
+	return nil, fmt.Errorf("Failed to dispatch %v to worker pool", conn)
 }
 
 func main() {
-	const workerview = `
-Worker[{{.Id}}]{{range .Conns}}{{ printf "#"}}{{end}}
-`
-	tmpl := template.Must(template.New("workerview").Parse(workerview))
-	if tmpl == nil {
-		log.Fatal("Could not parse worker template!")
+
+	signals := make(chan int)
+
+	// Gather the workforce
+	workers := []*Worker{
+		&Worker{Id: 2, Conns: make(chan net.Conn, 1)},
+		&Worker{Id: 3, Conns: make(chan net.Conn, 1)},
 	}
 
-	w1 := &Worker{Id: 9, Conns: []int8{1, 2}}
-	w2 := &Worker{Id: 9, Conns: []int8{9, 6, 4, 5, 2}}
-	w3 := &Worker{Id: 9, Conns: []int8{3, 9, 8}}
+	go func(chan int) {
+		for {
+			select {
+			case <-signals:
+				tmpl := template.Must(template.New("workerview").Parse(workerview))
+				for worker := range workers {
+					tmpl.Execute(os.Stdout, worker)
+				}
+			}
+		}
+	}(signals)
+	// Listen for signals to print changes
 
-	workers := []*Worker{w1, w2, w3}
-	//tmpl.Execute(os.Stdout, w1)
-
-	for _, worker := range workers {
-		tmpl.Execute(os.Stdout, worker)
+	// Listen up
+	server, err := net.Listen("tcp", ":31337")
+	if err != nil {
+		fmt.Printf("Couldn't start server!: %v", err)
 	}
+
+	// Dispatch to workers
+	for {
+		conn, err := server.Accept()
+		if err != nil {
+			fmt.Printf("Failed to accept client: %v", err)
+		}
+		go Dispatch(workers, conn, signals)
+	}
+
+	// We don't error error here since template.Must() will panic on failure
 }
