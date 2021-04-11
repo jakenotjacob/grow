@@ -1,61 +1,71 @@
 package main
 
 import (
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rand"
 	"crypto/x509"
-	"fmt"
-	"strings"
+	"crypto/x509/pkix"
+	"encoding/pem"
+	"log"
+	"math/big"
+	"os"
+	"time"
 )
 
-type Bundle struct {
-	RootCA         x509.Certificate
-	IntermediaryCA x509.Certificate
-}
+//TODO Generating chain
+// using parent field: x509.CreateCertificate(io.Reader, template, partent *Certificate,...)
 
-func (b *Bundle) CheckValidity() error {
-
-	// TODO Axchtually
-	// func (* Certifiate).Verify(chains [][]*Certificate, err, error){...}
-
-	return fmt.Errorf("OH FUCK OH NO INVALID")
-
-}
+// Generating self-signed certificates
 
 func main() {
 
-	// Generate self-signed certificate
-	// privkey, err := ecsda.GenerateKey
-
-	// Parse and verifying x509 certificate chain
-
-	//TODO Chain means that we need to use a linked list? Or... just use a slice w/ ?
-
-	rootca := &x509.Certificate{}
-	intermediaryca := &x509.Certificate{}
-
-	certs := []*x509.Certificate{rootca, intermediaryca}
-
-	// Here is the cert bundle
-	// chain := make([]x509.Certificate, 2)
-	// chain = append(certs, cas...)
-
-	// Issuer (CA) of each certificate matches the subject of the next certificate in the chain
-	certPool, err := x509.SystemCertPool()
+	// Make new private key
+	privateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
-		fmt.Println("Failed to parse system certificate pool!")
+		log.Fatalf("Failed to generate private key!: %v", err)
 	}
 
+	// Create certificate template
 	//
-	//	fmt.Sprintf("Total Domains/Subjects found in system CA pool: %v", len(certPool.Subjects[0:]))
-
+	// This is to get the largest possible value of a _signed_ integer (int64).
+	// We can do this by taking a int64 and shifting it left as far as possible.
 	//
-	for _, cert := range certPool.Subjects() {
-		var certstring []string
-		for _, sub := range cert {
-			//fmt.Printf(strings.Join(string(sub), " "))
-			certstring = append(certstring, string(sub))
-		}
-		fmt.Printf("%v", strings.Join(certstring, ""))
-		fmt.Println("------------------------")
+	// tldr; this is really just 2^128
+	serialNumberLimit := new(big.Int).Lsh(big.NewInt(1), 128)
+	serialNumber, err := rand.Int(rand.Reader, serialNumberLimit)
+	if err != nil {
+		log.Fatal("Failed to generate serial number!")
 	}
-	fmt.Println(certs)
+
+	template := x509.Certificate{
+		SerialNumber: serialNumber,
+		Subject: pkix.Name{
+			Organization: []string{"Tyrell Corp"},
+		},
+		DNSNames:    []string{"localhost"},
+		NotBefore:   time.Now(),
+		NotAfter:    time.Now().Add(3 * time.Hour),
+		KeyUsage:    x509.KeyUsageDigitalSignature,
+		ExtKeyUsage: []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
+	}
+
+	// x509.CreateCertificate() returns slice of certifcate in DER encoding
+	// Passing the template in the parent field denotes a self-signing
+	derBytes, err := x509.CreateCertificate(rand.Reader, &template, &template, &privateKey.PublicKey, privateKey)
+	if err != nil {
+		log.Fatalf("Failed to generate certificate: %v", err)
+	}
+
+	// pem = encode(DER-encoded-data)
+	pemCert := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: derBytes})
+	if pemCert == nil {
+		log.Fatal("Failed to encode cert to PEM")
+	}
+
+	err = os.WriteFile("cert.pem", pemCert, 0644)
+	if err != nil {
+		log.Fatalf("Failed to write PEM-encoded cert to file: %v", err)
+	}
+
 }
