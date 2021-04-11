@@ -30,7 +30,7 @@ func main() {
 	client := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
-				RootCAs: certPool,
+				RootCAs: certPool, // Add certPool with server cert to client's trusted CAs
 			},
 		},
 	}
