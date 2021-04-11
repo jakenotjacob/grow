@@ -4,11 +4,14 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
+	"crypto/tls"
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/pem"
+	"fmt"
 	"log"
 	"math/big"
+	"net/http"
 	"os"
 	"time"
 )
@@ -80,5 +83,37 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to write PEM-encoded key to file: %v", err)
 	}
+
+	// Now, use it for a HTTP server
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
+		if req.URL.Path != "/" {
+			http.NotFound(w, req)
+			return
+		}
+		fmt.Fprint(w, "WOOP")
+	})
+
+	srv := &http.Server{
+		Addr:    "127.0.0.1:8765",
+		Handler: mux,
+		TLSConfig: &tls.Config{
+			MinVersion:               tls.VersionTLS13,
+			PreferServerCipherSuites: true,
+		},
+	}
+
+	err = srv.ListenAndServeTLS("cert.pem", "key.pem")
+	if err != nil {
+		log.Fatalf("HTTPTLS server failed to start: %v", err)
+	}
+
+	//TESTING NOTES
+
+	// This will yell...
+	// curl --tlsv1.3 -v  https://localhost:8765
+
+	// ... unless we provide the cert
+	// curl --tlsv1.3 --cacert cert.pem -v https://localhost:8765
 
 }
