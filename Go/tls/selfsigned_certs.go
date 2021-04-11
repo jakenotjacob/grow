@@ -63,9 +63,22 @@ func main() {
 		log.Fatal("Failed to encode cert to PEM")
 	}
 
+	// Serialize certificate to file
 	err = os.WriteFile("cert.pem", pemCert, 0644)
 	if err != nil {
 		log.Fatalf("Failed to write PEM-encoded cert to file: %v", err)
+	}
+
+	privBytes, err := x509.MarshalPKCS8PrivateKey(privateKey)
+	if err != nil {
+		log.Fatalf("Unable to marshal private key: %v", err)
+	}
+
+	// Serialize private key to file
+	pemKey := pem.EncodeToMemory(&pem.Block{Type: "PRIVATE KEY", Bytes: privBytes})
+	err = os.WriteFile("key.pem", pemKey, 0644)
+	if err != nil {
+		log.Fatalf("Failed to write PEM-encoded key to file: %v", err)
 	}
 
 }
