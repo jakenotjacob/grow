@@ -1,6 +1,9 @@
 package main
 
-import "io"
+import (
+	"fmt"
+	"io"
+)
 
 // thinking on scrollable buffers / "paging"
 
@@ -22,11 +25,38 @@ type Pager struct {
 	Page []*Pageable
 }
 
-type Seekeable interface{}
+type Seekable interface {
+	Pageable
+}
+
+// aggregate interface; behavior container
+type Seeky interface {
+	Sneek()
+	Snoop()
+	Poke()
+	Prod()
+}
+
+// youre a seeker if you're seekable and have something to seek through (a page)
 type Seeker struct {
+	Seekable       // interface
+	Pageable       // interface
+	Seeky          // interface
+	Page     Pager // struct!
+}
+
+// seekers are seekable
+type Seekers interface {
 	Seekable
 }
 
 func main() {
+	var s Seeky
+
+	fmt.Printf("(%v, %T)\n", s, s)
+
+	s = &Seeker{}
+
+	fmt.Printf("(%v, %T)\n", s, s)
 
 }
