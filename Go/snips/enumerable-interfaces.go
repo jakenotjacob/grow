@@ -22,7 +22,7 @@ type Pageable interface {
 // pager itself is pageable (to view nested ones?) WE CAN GO DEEPER
 type Pager struct {
 	Pageable
-	Page []*Pageable
+	Pages []*Pageable
 }
 
 type Seekable interface {
