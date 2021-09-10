@@ -32,9 +32,7 @@ func main() {
 	// Create certificate template
 	//
 	// This is to get the largest possible value of a _signed_ integer (int64).
-	// We can do this by taking a int64 and shifting it left as far as possible.
-	//
-	// tldr; this is really just 2^128
+	// tldr; this is really just 2^128 or (1 << 128)
 	serialNumberLimit := new(big.Int).Lsh(big.NewInt(1), 128)
 	serialNumber, err := rand.Int(rand.Reader, serialNumberLimit)
 	if err != nil {
