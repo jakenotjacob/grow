@@ -86,7 +86,7 @@ func main() {
 		case Shooer:
 			fmt.Println("itsashooer")
 		default:
-			fmt.Println("It was neither! %T", x)
+			fmt.Printf("It was neither! %T\n", x)
 		}
 	}
 }

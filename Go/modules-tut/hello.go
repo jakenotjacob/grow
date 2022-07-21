@@ -1,8 +1,13 @@
 package hello
 
-import "rsc.io/quote/v3"
+import (
+	"fmt"
+
+	"rsc.io/quote/v3"
+)
 
 func Hello() string {
+	fmt.Println("asdf")
 	return quote.HelloV3()
 }
 
